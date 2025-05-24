@@ -19,3 +19,21 @@ read_1 <- function(filepath) {
   }
   return(seqs)
 }
+
+ematrix <- function(seqs, states, symbols) {
+  ecounts <- matrix(1, nrow = length(states), ncol = length(symbols))  # Laplace smoothing
+  rownames(ecounts) <- states
+  colnames(ecounts) <- symbols
+  for (seq in seqs) {
+    for (i in seq_along(seq)) {
+      if (i <= length(states)) {
+        aa <- seq[i]
+        if (aa %in% symbols) {
+          ecounts[states[i], aa] <- ecounts[states[i], aa] + 1
+        }
+      }
+    }
+  }
+  emission_probs <- ecounts / rowSums(ecounts)
+  return(emission_probs)
+}
