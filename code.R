@@ -37,3 +37,16 @@ ematrix <- function(seqs, states, symbols) {
   emission_probs <- ecounts / rowSums(ecounts)
   return(emission_probs)
 }
+
+prob_path <- function(hmm, obs_seq, viterbi_path) {
+  log_prob <- log(hmm$startProbs[viterbi_path[1]]) +
+              log(hmm$emissionProbs[viterbi_path[1], obs_seq[1]])
+  for (t in 2:length(obs_seq)) {
+    prev_state <- viterbi_path[t - 1]
+    curr_state <- viterbi_path[t]
+    symbol <- obs_seq[t]
+    log_prob <- log_prob + log(hmm$transProbs[prev_state, curr_state]) +
+                             log(hmm$emissionProbs[curr_state, symbol])
+  }
+  return(log_prob)
+}
