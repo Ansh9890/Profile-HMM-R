@@ -50,3 +50,19 @@ prob_path <- function(hmm, obs_seq, viterbi_path) {
   }
   return(log_prob)
 }
+
+args <- commandArgs(trailingOnly=TRUE)
+train_file <- args[1]
+test_file <- args[2]
+train_seqs <- read_1(train_file)
+normal_seqs <- train_seqs$normal
+mutation_seqs <- train_seqs$mutation
+max_len <- max(sapply(c(normal_seqs, mutation_seqs), length))
+num_match_states <- min(50, max_len)
+num_insert_states <- num_match_states
+states <- c(paste0("M", 1:num_match_states), paste0("I", 1:num_insert_states))
+symbols <- c("A", "R", "N", "D", "C", "E", "Q", "G", "H", "I",
+             "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V")
+emission_normal <- ematrix(normal_seqs, states, symbols)
+emission_mutation <- ematrix(mutation_seqs, states, symbols)
+trans_mat <- matrix(0, nrow = length(states), ncol = length(states))
