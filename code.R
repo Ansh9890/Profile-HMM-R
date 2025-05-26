@@ -66,3 +66,22 @@ symbols <- c("A", "R", "N", "D", "C", "E", "Q", "G", "H", "I",
 emission_normal <- ematrix(normal_seqs, states, symbols)
 emission_mutation <- ematrix(mutation_seqs, states, symbols)
 trans_mat <- matrix(0, nrow = length(states), ncol = length(states))
+rownames(trans_mat) <- states
+colnames(trans_mat) <- states
+start_probs <- rep(0, length(states))
+start_probs[1] <- 1.0
+hmm_normal <- initHMM(states, symbols, start_probs, trans_mat, emission_normal)
+hmm_mutation <- initHMM(states, symbols, start_probs, trans_mat, emission_mutation)
+test_seq <- readLines(test_file)
+test_seq <- test_seq[nzchar(test_seq)]
+test_seq <- strsplit(test_seq[1], "")[[1]]
+test_seq <- test_seq[test_seq %in% symbols]
+viterbi_normal <- viterbi(hmm_normal, test_seq)
+viterbi_mutation <- viterbi(hmm_mutation, test_seq)
+logprob_normal <- prob_path(hmm_normal, test_seq, viterbi_normal)
+logprob_mutation <- prob_path(hmm_mutation, test_seq, viterbi_mutation)
+if (logprob_mutation < logprob_normal) {
+  cat("The sequence is mutated\n")
+} else {
+  cat("The sequence is normal\n")
+}
